@@ -14,6 +14,18 @@ The target column, `Recommended IND`, is `1` when a customer recommends the prod
 | Categorical | `Clothing ID`, `Division Name`, `Department Name`, `Class Name` |
 | Text | `Title`, `Review Text` |
 
+### Repository files
+
+| File | Purpose |
+| --- | --- |
+| `starter/starter.ipynb` | Data exploration, preprocessing, training, tuning, and final evaluation. |
+| `starter/data/reviews.csv` | Customer reviews used for training and evaluation. |
+| `starter/README.md` | Original instructions describing the starter folder. |
+| `requirements.txt` | Python packages required to run the notebook. |
+| `.gitignore` | Patterns for local files excluded from version control. |
+| `CODEOWNERS` | Repository code ownership configuration. |
+| `LICENSE.txt` | License and usage terms for the educational content. |
+
 ### Dependencies
 
 Use Python 3 and the packages listed in [requirements.txt](requirements.txt):
@@ -64,13 +76,13 @@ Cross-validation and grid search repeat the text preprocessing for each fit and 
 ### Break Down Tests
 
 - **Data inspection:** Checks feature types, distributions, missing values, and target class balance.
-- **Holdout evaluation:** Reserves 10% of the data for testing using `random_state=27`. A classification report measures precision, recall, and F1 score, while a confusion matrix shows correct predictions and errors for each class.
+- **Holdout evaluation:** Reserves 10% of the data for testing using `random_state=27`. After tuning finishes, evaluates `grid_search.best_estimator_` on this held-out set. Reports accuracy and per-class precision, recall, and F1 score, plus a confusion matrix.
 - **Cross-validation:** Uses five folds on the training data to measure accuracy across different splits. Preprocessing stays inside the pipeline so each fold fits its transformations on its own training subset.
 - **Hyperparameter search:** Uses five-fold `GridSearchCV` to compare logistic regression's `C` values of `0.1`, `1.0`, and `10.0`, selecting the best estimator by accuracy.
 
-The saved notebook outputs report approximately **90% baseline test accuracy**, **90.27% mean cross-validation accuracy**, and a best parameter of **`classifier__C = 1.0`**. Test-set F1 scores are **0.71** for non-recommendations and **0.94** for recommendations. About 82% of reviews recommend the product, making per-class metrics useful alongside accuracy.
+- **Missing-value prediction check:** Predicts on synthetic reviews containing `NaN`, `None`, and `pandas.NA` across feature types, an entirely missing row, and an unseen category. Checks that the fitted pipeline returns valid labels without errors.
 
-These figures come from the saved outputs of a previous run. The notebook selects the tuned estimator but does not include a separate test-set evaluation of that estimator.
+About 82% of reviews recommend the product, making per-class metrics useful alongside accuracy. The final test metrics are reported in the notebook's **Final Test Evaluation** section, after model selection is complete.
 
 ## Project Instructions
 
@@ -79,12 +91,13 @@ Complete the workflow in [starter/starter.ipynb](starter/starter.ipynb):
 1. Load the reviews and separate the eight input features from `Recommended IND`.
 2. Explore the data, including numerical summaries, categorical values, missing values, and class balance.
 3. Build preprocessing pipelines for each feature type:
-   - Scale numerical features with `StandardScaler`.
-   - Encode categorical features with `OneHotEncoder(handle_unknown='ignore')`.
-   - Process titles and review bodies separately with TF-IDF, capped at 1,000 features per text column. Use a custom spaCy tokenizer to lemmatize and lowercase tokens and remove stop words, punctuation, and whitespace.
+   - Normalize null markers, impute numerical features with training-set medians, and scale with `StandardScaler`.
+   - Normalize null markers, impute categorical features with training-set modes, and encode with `OneHotEncoder(handle_unknown='ignore')`. Keep `Clothing ID` categorical.
+   - Fill missing titles and review bodies with empty strings inside the text pipeline before TF-IDF, capped at 1,000 features per text column. Use a custom spaCy tokenizer to lemmatize and lowercase tokens and remove stop words, punctuation, and whitespace.
 4. Combine preprocessing with `ColumnTransformer` and add a `LogisticRegression` classifier in a single `Pipeline`.
-5. Train the pipeline on the training split and evaluate its predictions on the test split.
-6. Run five-fold cross-validation and tune the classifier with `GridSearchCV`.
+5. Train the pipeline and run five-fold cross-validation using only the training split.
+6. Tune the classifier with `GridSearchCV` on the training data, then evaluate the best estimator on the held-out test set.
+7. Verify that the fitted pipeline can predict on synthetic reviews with missing features and an unseen category.
 
 ## Built With
 
