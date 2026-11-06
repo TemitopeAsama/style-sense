@@ -1,4 +1,4 @@
-# Customer Recommendation Prediction
+# StyleSense - Customer Recommendation Prediction
 
 A machine learning pipeline that predicts whether a customer recommends a clothing product using numerical, categorical, and review text features. This Udacity Data Scientist Nanodegree project combines feature preprocessing and logistic regression in a scikit-learn pipeline, with model evaluation, cross-validation, and hyperparameter tuning.
 
